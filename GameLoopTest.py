@@ -24,6 +24,7 @@ while player is None:
 
 level = 1
 exp = 0
+gold = 0
 current_hp = player['hp']
 floor = 1
 game_running = True
@@ -70,7 +71,7 @@ while game_running and floor <= 70 and current_hp > 0:
     if action == "1":
         result = venture()
 
-        if result == "a monster appears!":
+        if result == "A monster have appeared":
             monsters = [
                 ("Imp", 40, 10, 30, 20),
                 ("Hell cats", 50, 12, 40, 25),
