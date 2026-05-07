@@ -64,7 +64,7 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward):
         monster_hp = attack_monster(monster_hp, player["attack"])
 
         # show monster HP after attack
-        print(f"{name} HP: {monster_hp}")
+        print(f"{monster_name} HP: {monster_hp}")
 
         # check if monster is defeated
         if monster_hp <= 0:
