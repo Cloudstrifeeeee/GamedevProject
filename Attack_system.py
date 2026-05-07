@@ -1,6 +1,4 @@
 #put this above or before the main loop
-#add a gold variable beside exp and player stats
-
 
 # PLAYER ATTACK SYSTEM
 # This function reduces the monster's HP based on player attack
