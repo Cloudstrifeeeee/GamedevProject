@@ -459,7 +459,7 @@ while game_running and floor <= 70 and current_hp > 0:
             monsters = [
                 ("Imp", 40, 10, 30, 20),
                 ("Hell cats", 50, 12, 40, 25),
-                ("Lesser Fiends", 70, 15, 60, 35)
+                ("Lesser Fiends", 70, 15, 60, 35),
                 ("Epere", 30, 10, 15, 20),
                 ("Carnivorous Epere", 35, 15, 25, 30),
                 ("Dungeon Wolf", 20, 15, 15, 20),
