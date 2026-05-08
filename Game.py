@@ -33,7 +33,7 @@ hero_gold = 0
 inventory = []
 
 sample_items = {
-    "Cannon Ball +3 atk":{
+    "Healing potion +30 hp":{
         "price":20,
         "attack":3,
         "defense":0

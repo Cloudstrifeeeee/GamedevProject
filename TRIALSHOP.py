@@ -33,9 +33,30 @@ hero_gold = 0
 inventory = []
 
 sample_items = {
-    "Cannon Ball +3 atk": {"price": 20},
-    "Titan's Blood +10 atk": {"price": 75},
-    "Centaur's Heart +3 def": {"price": 35}
+    "Minotaur's Tongue +3 atk":{
+        "price":20,
+        "attack":3,
+        "defense":0,
+        "hp":0
+    },
+    "Titan,s blood +10 atk":{
+        "price":75,
+        "attack":10,
+        "defense":0,
+        "hp":0
+    },
+    "Centaur heart +3 def":{
+        "price":35,
+        "attack":0,
+        "defense":3,
+        "hp":0
+    },
+    "Amborsia +2 hp":{
+        "price":50,
+        "attack":0,
+        "defense":0,
+        "hp":2
+    },
 }
 
 print(f"\nYou selected: {player['class']} class")
@@ -83,7 +104,7 @@ def shop():
         # Add this into the choices - After Line 31
         #----------------------------
         print("--------------------------")
-        print("4. Sell")
+        print("5. Sell")
 
         print("0. Exit Shop")
 
@@ -94,7 +115,7 @@ def shop():
             break
 
         # ================= SELLING SYSTEM =================
-        elif choice == "4":   
+        elif choice == "5":   
 
             # NOTE: THIS SHOULD BE AFTER
             # -------------------------
@@ -182,6 +203,9 @@ def shop():
                     #adds item/s to the list in the inventory
                     # Step 3 for inventory
                     inventory.append(item_name)
+                    player["attack"] += item_data["attack"]
+                    player["defense"] += item_data["defense"]
+                    player["hp"] += item_data["hp"]
 
                     print(f"You bought {item_name}")
 
@@ -359,7 +383,7 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward):
         print("\nChoose action:")
         print("(1) Attack")
         print("(2) Skill")
-        print("(3). Run")
+        print("(3) Run")
 
         # ask player for combat input
         combat_choice = input("> ")
@@ -423,9 +447,9 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward):
         
         #checks the level up progress
 
-            if exp >= level * 100:
+            if exp >= level * 120:
                 level += 1
-                player['hp'] += 30
+                player['hp'] += 15
                 player['attack'] += 5
                 player['defense'] += 3
                 current_hp = player['hp']
@@ -466,21 +490,21 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward):
             return False
 
 monsters_early = [        # floor 1-20
-    ("Imp", 40, 10, 30, 20),
-    ("Hellcat", 50, 12, 40, 25),
-    ("Fiend", 70, 15, 60, 35)
+    ("Imp", 40, 10, 10, 20),
+    ("Hellcat", 50, 10, 40, 25),
+    ("Fiend", 70, 15, 30, 35)
 ]
 
 monsters_mid = [          # floor 21-50
-    ("Demon", 90, 20, 70, 45),
-    ("Wraith", 110, 25, 90, 55),
-    ("Hellhound", 130, 30, 100, 60)
+    ("Demon", 90, 20, 50, 45),
+    ("Wraith", 110, 25, 50, 55),
+    ("Hellhound", 130, 30, 55, 60)
 ]
 
 monsters_late = [         # floor 51-70
-    ("Fallen Angel", 160, 40, 130, 80),
-    ("Shadow Lord", 180, 45, 150, 90),
-    ("Soul Reaper", 200, 50, 170, 100)
+    ("Fallen Angel", 160, 70, 60, 80),
+    ("Shadow Lord", 180, 65, 65, 90),
+    ("Soul Reaper", 200, 70, 70, 100)
 ]
 
 # ================= MAIN GAME LOOP =================
@@ -552,7 +576,7 @@ while game_running and floor <= 70 and current_hp > 0:
 
         elif result == "An ominous enemy have appeared":
             print("\nAn ferocious beast appears!")
-            boss_result = fight("Cerberus", 120, 50, 150, 100)
+            boss_result = fight("Cerberus", 120, 51, 50, 100)
             if not boss_result:
                 game_running = False
                 break
@@ -566,7 +590,7 @@ while game_running and floor <= 70 and current_hp > 0:
         if floor > 70:
             print("\nYou have reached the deepest floor!")
             print("\nThe sovereign of this labyrinth stands before you")
-            boss_result = fight("Hades", 400, 100, 500, 100)
+            boss_result = fight("Hades", 500, 100, 500, 1000)
             if boss_result == True:
                 print("The Labyrinth begins to disappear as the light engulfs" \
                 "\ncongratulations, You successfully escaped the Labyrinth of Hades!")
