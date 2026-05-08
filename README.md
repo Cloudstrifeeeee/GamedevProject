@@ -1,4 +1,7 @@
 # GamedevProject
+# Game Title - 
+# Game Mechanics -
+# Game Genre - 
 # Group Members
 # Group 2
 # Tabamo, Dhayle
