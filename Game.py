@@ -33,9 +33,21 @@ hero_gold = 0
 inventory = []
 
 sample_items = {
-    "Cannon Ball +3 atk": {"price": 20},
-    "Heavy Ball +10 atk": {"price": 75},
-    "Basic Armor +3 def": {"price": 35}
+    "Cannon Ball +3 atk":{
+        "price":20,
+        "attack":3,
+        "defense":0
+    },
+    "Heavy Ball +10 atk":{
+        "price":75,
+        "attack":10,
+        "defense":0
+    },
+    "Basic Armor +3 def":{
+        "price":35,
+        "attack":0,
+        "defense":3
+    }
 }
 
 print(f"\nYou selected: {player['class']} class")
@@ -391,6 +403,8 @@ def shop():
                         if confirm.lower() == "y":
 
                             inventory.pop(index)
+                            player["attack"] -= sample_items[item_name]["attack"]
+                            player["defense"] -= sample_items[item_name]["defense"]
 
                             hero_gold += sell_price
 
@@ -425,6 +439,8 @@ def shop():
                     #adds item/s to the list in the inventory
                     # Step 3 for inventory
                     inventory.append(item_name)
+                    player["attack"] += item_data["attack"]
+                    player["defense"] += item_data["defense"]
 
                     print(f"You bought {item_name}")
 
