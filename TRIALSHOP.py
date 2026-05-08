@@ -1,14 +1,14 @@
 import random
 
-print("========DND presents : Let's eat in the Dungeon========")
+print("===============Hades' Labyrinth===============")
 
 pname = input("Enter your name HERO :")
 
 classes = {
     "1": {"class": "Dictator", "hp": 150, "attack": 20, "defense": 15, "skill": "Absolute Decree"},
-    "2": {"class": "Cop", "hp": 80, "attack": 15, "defense": 5, "skill": "Police Brutality"},
+    "2": {"class": "Cop", "hp": 80, "attack": 30, "defense": 5, "skill": "Police Brutality"},
     "3": {"class": "Fixer", "hp": 100, "attack": 25, "defense": 10, "skill": "Loophole Stab"},
-    "4": {"class": "Nepotist", "hp": 90, "attack": 15, "defense": 5, "skill": "Inherited Blow"}
+    "4": {"class": "Nepotist", "hp": 90, "attack": 25, "defense": 5, "skill": "Inherited Blow"}
 }
 
 print("Please choose your background (cannot be changed till the end!)")
@@ -27,15 +27,15 @@ exp = 0
 current_hp = player['hp']
 floor = 1
 game_running = True
-
+max_hp = current_hp
 # ================= ECONOMY SYSTEM =================
 hero_gold = 0
 inventory = []
 
 sample_items = {
     "Cannon Ball +3 atk": {"price": 20},
-    "Heavy Ball +10 atk": {"price": 75},
-    "Basic Armor +3 def": {"price": 35}
+    "Titan's Blood +10 atk": {"price": 75},
+    "Centaur's Heart +3 def": {"price": 35}
 }
 
 print(f"\nYou selected: {player['class']} class")
@@ -47,12 +47,12 @@ print("=" * 55)
 
 def venture():
     events=[
-        ("A monster have appeared!", 1), 
-        ("A merchant appeared!", 40),
-        ("You found something useful!", 25),
+        ("A monster have appeared!", 44), 
+        ("A merchant appeared!", 20),
+        ("You found something useful!", 15),
         ("You triggered a trap!", 15),
-        ("An ominous enemy have appeared", 10),
-        ("You found what seem to be an exit!", 50)
+        ("An ominous enemy have appeared", 5),
+        ("You found what seem to be an exit!", 1)
     ]#the event tupples, yall can add more here 
     
     roll = random.randint(1, 100)
@@ -195,6 +195,294 @@ def shop():
             print("Enter numbers only")
 
 
+#put this above or before the main loop
+
+
+# PLAYER ATTACK SYSTEM
+# This function reduces the monster's HP based on player attack
+def attack_monster(monster_hp, player_atk):
+
+    # subtract player attack from monster HP
+    monster_hp -= player_atk
+
+    # prevent HP from going below 0
+    if monster_hp < 0:
+        monster_hp = 0
+
+    # display damage dealt
+    print(f"You dealt {player_atk} damage!")
+
+    # return updated monster HP back to fight system
+    return monster_hp
+
+
+# MONSTER ATTACK SYSTEM
+# This function reduces player HP based on monster attack and player defense
+def attack_player(player_hp, monster_atk, player_defense):
+
+    # calculate damage after defense reduction
+    damage = monster_atk - player_defense
+
+    # minimum damage is 1 (so defense doesn't fully block attacks)
+    if damage < 1:
+        damage = 1
+
+    # subtract damage from player HP
+    player_hp -= damage
+
+    # prevent HP from going below 0
+    if player_hp < 0:
+        player_hp = 0
+
+    # display damage dealt to player
+    print(f"The monster dealt {damage} damage!")
+
+    # return updated player HP
+    return player_hp
+
+# SKILL SYSTEM
+# Handles player special abilities
+def use_skill(monster_hp, monster_atk):
+
+    # allows modification of player HP
+    global current_hp
+
+    # get player's class skill
+    skill = player["skill"]
+
+    # display skill usage
+    print(f"\nYou used {skill}!")
+
+
+
+    # =========================
+    # DICTATOR SKILL
+    # =========================
+    if skill == "Absolute Decree":
+
+        # heavy damage attack
+        damage = player["attack"] * 2
+
+        # reduce monster HP
+        monster_hp -= damage
+
+        print(f"The enemy was crushed for {damage} damage!")
+
+
+
+    # =========================
+    # COP SKILL
+    # =========================
+    elif skill == "Police Brutality":
+
+        # bonus damage attack
+        damage = player["attack"] + 15
+
+        monster_hp -= damage
+
+        print(f"You beat the enemy for {damage} damage!")
+
+
+
+    # =========================
+    # FIXER SKILL
+    # =========================
+    elif skill == "Loophole Stab":
+
+        # random critical damage
+        damage = player["attack"] + random.randint(10, 25)
+
+        monster_hp -= damage
+
+        print(f"Critical strike! {damage} damage dealt!")
+
+
+
+    # =========================
+    # NEPOTIST SKILL
+    # =========================
+    elif skill == "Inherited Blow":
+
+        # damage + heal skill
+        damage = player["attack"] + 10
+
+        monster_hp -= damage
+
+        # healing amount
+        heal = 10
+
+        # restore player HP
+        current_hp += heal
+
+        # prevent overhealing
+        if current_hp > player["hp"]:
+            current_hp = player["hp"]
+
+        print(f"You dealt {damage} damage!")
+        print(f"You recovered {heal} HP!")
+
+
+
+    # prevent monster HP from becoming negative
+    if monster_hp < 0:
+        monster_hp = 0
+
+    # return updated monster HP
+    return monster_hp
+
+
+# MAIN FIGHT SYSTEM
+# Handles the battle between player and monster
+def fight(monster_name, hp, atk, exp_reward, gold_reward):
+
+    # allows this function to modify global variables
+    global current_hp, exp, hero_gold, level
+
+    # set monster HP for this battle
+    monster_hp = hp
+
+    # encounter message
+    print(f"\nA {monster_name} appears!")
+
+    # battle loop
+    # continues until either the monster or player dies
+    while monster_hp > 0 and current_hp > 0:
+
+        # =========================
+        # PLAYER TURN
+        # =========================
+    
+        print(f"\nYour HP: {current_hp}/{player['hp']}")
+        print(f"{monster_name} HP: {monster_hp}")
+
+        # display combat choices
+        print("\nChoose action:")
+        print("(1) Attack")
+        print("(2) Skill")
+        print("(3). Run")
+
+        # ask player for combat input
+        combat_choice = input("> ")
+
+        # NORMAL ATTACK
+        if combat_choice == "1":
+
+            # call attack function
+            # reduces monster HP using player attack stat
+            monster_hp = attack_monster(
+                monster_hp,
+                player["attack"]
+            )
+
+        # SKILL ATTACK
+        elif combat_choice == "2":
+
+            # use class special skill
+            monster_hp = use_skill(
+                monster_hp,
+                atk
+            )
+
+        elif combat_choice == "3":
+            if random.random() < 0.5:
+                print("\nYou escaped successfully!")
+                return True
+            
+                
+        # INVALID INPUT
+        else:
+
+            # prevent invalid actions
+            print("Invalid action!")
+
+            # restart current loop iteration
+            continue
+
+        # show remaining monster HP
+        print(f"{monster_name} HP: {monster_hp}")
+
+
+
+        # =========================
+        # CHECK IF MONSTER DIED
+        # =========================
+
+        if monster_hp <= 0:
+
+            # victory message
+            print(f"\nYou defeated the {monster_name}!")
+
+            # reward player
+            exp += exp_reward
+            hero_gold += gold_reward
+
+            # display rewards
+            print(f"Gained {exp_reward} EXP and {gold_reward} gold!")
+
+            # player wins battle
+        
+        #checks the level up progress
+
+            if exp >= level * 100:
+                level += 1
+                player['hp'] += 30
+                player['attack'] += 5
+                player['defense'] += 3
+                current_hp = player['hp']
+                print(f"\nLEVEL UP! Now level {level}!")
+                print(f"HP +30 | Attack +5 | Defense +3")
+            return True
+
+
+
+        # =========================
+        # MONSTER TURN
+        # =========================
+
+        # monster attacks player
+        current_hp = attack_player(
+            current_hp,
+            atk,
+            player["defense"]
+        )
+
+        # display updated player HP
+        print(f"Your HP: {current_hp}")
+
+        
+
+
+
+        # =========================
+        # CHECK IF PLAYER DIED
+        # =========================
+
+        if current_hp <= 0:
+
+            # death message
+            print("\nYou died...")
+
+            # player loses battle
+            return False
+
+monsters_early = [        # floor 1-20
+    ("Imp", 40, 10, 30, 20),
+    ("Hellcat", 50, 12, 40, 25),
+    ("Fiend", 70, 15, 60, 35)
+]
+
+monsters_mid = [          # floor 21-50
+    ("Demon", 90, 20, 70, 45),
+    ("Wraith", 110, 25, 90, 55),
+    ("Hellhound", 130, 30, 100, 60)
+]
+
+monsters_late = [         # floor 51-70
+    ("Fallen Angel", 160, 40, 130, 80),
+    ("Shadow Lord", 180, 45, 150, 90),
+    ("Soul Reaper", 200, 50, 170, 100)
+]
+
 # ================= MAIN GAME LOOP =================
 while game_running and floor <= 70 and current_hp > 0:
     print(f"\n{'='*20} FLOOR {floor} {'='*20}")
@@ -204,8 +492,7 @@ while game_running and floor <= 70 and current_hp > 0:
     print("\nchoose your action")
     print("(1)Venture onward")
     print("(2)Item")
-    print("(3)Equip")
-    print("(4)Bail")
+    print("(3)Bail")
 
     action = input("> ")
 
@@ -213,12 +500,42 @@ while game_running and floor <= 70 and current_hp > 0:
         result = venture()
 
         if result == "A monster have appeared!":
-            print("Monster encounter (not implemented)")
+            if floor <= 20:
+                monsters = monsters_early
+            elif floor <= 50:
+                monsters = monsters_mid
+            else:
+                monsters = monsters_late
+            
+            enemy = random.choice(monsters)
+            fight_result = fight(enemy[0], enemy[1], enemy[2], enemy[3], enemy[4])
+            
+            if not fight_result:
+                game_running = False
+                break
+            
 
         elif result == "You found something useful!":
-            gold_found = random.randint(20, 50)
-            hero_gold += gold_found
-            print(f"Found {gold_found} gold!")
+            
+            useful = [
+                ("money", 40),
+                ("potion", 60)
+            ]
+
+            roll = random.randint(1, 100)
+            total = 0
+            
+            for item, chance in useful:
+                total += chance
+                if roll <= total:
+                    if item == "money":
+                        gold_found = random.randint(20, 50)
+                        hero_gold += gold_found
+                        print(f"\nFound {gold_found} gold!")
+                    elif item == "potion":
+                        current_hp = min(current_hp + 30, player['hp'])
+                        print(f"\nFound a potion! Restored 30 HP!")
+                    break
 
         elif result == "You triggered a trap!":
             trap_damage = random.randint(10, 25)
@@ -234,7 +551,11 @@ while game_running and floor <= 70 and current_hp > 0:
             shop()
 
         elif result == "An ominous enemy have appeared":
-            print("Boss fight (not implemented)")
+            print("\nAn ferocious beast appears!")
+            boss_result = fight("Cerberus", 120, 50, 150, 100)
+            if not boss_result:
+                game_running = False
+                break
 
         elif result == "You found what seem to be an exit!":
             print("You escaped!")
@@ -244,6 +565,14 @@ while game_running and floor <= 70 and current_hp > 0:
 
         if floor > 70:
             print("\nYou have reached the deepest floor!")
+            print("\nThe sovereign of this labyrinth stands before you")
+            boss_result = fight("Hades", 400, 100, 500, 100)
+            if boss_result == True:
+                print("The Labyrinth begins to disappear as the light engulfs" \
+                "\ncongratulations, You successfully escaped the Labyrinth of Hades!")
+                game_running = False
+                break 
+
 
     elif action == "2": #change later
         print("\n--- INVENTORY ---")
@@ -254,11 +583,6 @@ while game_running and floor <= 70 and current_hp > 0:
             for i, item in enumerate(inventory, start=1):
                 print(f"{i}. {item}")
 
-    elif action == "3": #change later
-        print("\n--- EQUIPMENT ---")
-        print(f"Weapon: None (Attack: {player['attack']})")
-        print(f"Armor: None (Defense: {player['defense']})")
-
-    elif action == "4": 
+    elif action == "3": 
         print("\nYou try to bail... but the labyrinth won't let you leave!")
         print("You must press onward!")
