@@ -229,16 +229,16 @@ def shop(): # the shop function handles buying and selling
             print(f"{i}. {item} - {data['price']} gold")
 
         print("------------------------------------------------------")
-        print("9. Sell")
-        print("0. Exit Shop")
+        print("(0) Sell")
+        print("(14) Exit Shop")
 
         choice = input("Choose item: ")
 
-        if choice == "0":
+        if choice == "14":
             print("Leaving shop...")
             break # break exits the nearest while loop immediately
 
-        elif choice == "9": # selling branch
+        elif choice == "0": # selling branch
             if len(inventory) == 0: # len() returns how many items are in the list
                 print("\033[0;31mThere is nothing to sell, your inventory is empty!\033[0m")
 
