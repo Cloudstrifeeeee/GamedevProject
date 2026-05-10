@@ -17,8 +17,8 @@ pname = input("Enter your name HERO :") # input() pauses the game and waits for 
 # "cast" is how many spell slots (skill uses) the class starts with
 classes = {
     "1": {"class": "Dictator", "hp": 150, "attack": 20, "defense": 15, "skill": "Absolute Decree", "cast": 6},
-    "2": {"class": "Cop",      "hp": 80,  "attack": 30, "defense": 5,  "skill": "Police Brutality", "cast": 5},
-    "3": {"class": "Fixer",    "hp": 100, "attack": 25, "defense": 10, "skill": "Loophole Stab",    "cast": 7},
+    "2": {"class": "Cop",      "hp": 80,  "attack": 30, "defense": 5,  "skill": "Police Brutality", "cast": 4},
+    "3": {"class": "Fixer",    "hp": 100, "attack": 25, "defense": 10, "skill": "Loophole Stab",    "cast": 6},
     "4": {"class": "Nepotist", "hp": 90,  "attack": 25, "defense": 5,  "skill": "Inherited Blow",   "cast": 4}
 }
 
