@@ -42,8 +42,8 @@ while player is None:
 level = 1           # what level the player is — goes up when exp hits the threshold
 exp = 0             # experience points earned from killing monsters
 current_hp = player['hp'] # current_hp can go up and down in battle; player['hp'] is the max
-section = 1
-room = 0            # which room of the labyrinth the player is in
+section = 0
+room = 1            # which room of the labyrinth the player is in
 game_running = True # boolean flag — when this becomes False the main loop stops and the game ends
 max_hp = current_hp # saves the starting max hp for reference (not actively used but good to have)
 current_slot = player['cast'] # how many skill uses the player currently has left
@@ -171,7 +171,7 @@ sample_items = {
         "type": "consumable"
     },
 
-    "Elixir of the Gods": { # the only item that can revive you from death
+    "Phoenix Ashes": { # the only item that can revive you from death
         "price": 300,    # very expensive to buy but worth it as a safety net
         "attack": 0,
         "defense": 0,
@@ -345,16 +345,16 @@ def use_consumable(item_name): # handles using a consumable item from inventory
 def attempt_revive(): # checks if the player has a revive item and asks if they want to use it
     global current_hp, current_slot, inventory # need these globals to actually perform the revival
 
-    if "Elixir of the Gods" in inventory: # "in" checks if a value exists anywhere in the list
+    if "Phoenix Ashes" in inventory: # "in" checks if a value exists anywhere in the list
         print(f"\n{Y}══════════════════════════════════════════════════════")
         print("  You feel a warmth in your satchel...")
-        print("  An Elixir of the Gods glows faintly.")
+        print("  An Phoenix Ashes glows faintly.")
         print(f"══════════════════════════════════════════════════════{RESET}")
-        choice = input("Use the Elixir of the Gods to revive? (y/n): ")
+        choice = input("Use the Phoenix Ashes to revive? (y/n): ")
 
         if choice.lower() == "y":
-            inventory.remove("Elixir of the Gods") # removes it from inventory — one use only
-            item = sample_items["Elixir of the Gods"] # gets the item's stats
+            inventory.remove("Phoenix Ashes") # removes it from inventory — one use only
+            item = sample_items["Phoenix Ashes"] # gets the item's stats
             current_hp   = min(item["hp"],          player["hp"]) # restores hp fully (9999 capped to max)
             current_slot = min(current_slot + item.get("cast", 0), player["cast"]) # restores some spell slots
             print(f"\n{G}The elixir surges through your veins!")
@@ -531,17 +531,18 @@ def use_skill(monster_hp, monster_atk): # player's class skill — uses a spell 
     return monster_hp
 
 
-def fight(monster_name, hp, atk, exp_reward, gold_reward, monster_skill=None, drops=[]):
+def fight(monster_name, hp, atk, exp_reward, gold_reward, lore,  monster_skill=None, drops=[]):
     # monster_skill=None means it's optional — if you don't pass one in, the monster has no special move
     # drops=[] means it's also optional — if you don't pass drops, the monster drops nothing
     global current_hp, exp, hero_gold, level, current_slot
 
     monster_hp = hp
     print(f"\nA {monster_name} appears!")
+    print(f"Lore: {lore}")
 
     while monster_hp > 0 and current_hp > 0: # both sides are alive, so battle continues
 
-        # ── MONSTER FLEE CHECK ──────────────────────────────
+        #MONSTER FLEE CHECK 
         # if player's attack alone is enough to one-shot what's left of the monster, it might run
         if player["attack"] >= monster_hp:
             if random.random() < 0.25: # random.random() gives a float from 0.0 to 1.0
@@ -552,7 +553,7 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward, monster_skill=None, dr
                 print(f"Gained {exp_reward // 2} EXP and {gold_reward // 2} gold from scaring it off!")
                 return True # True = player "won" this encounter even though monster ran
 
-        # ── PLAYER TURN ─────────────────────────────────────
+        #PLAYER TURN
         print(f"\n{G}Your HP: {current_hp}/{player['hp']} | Spell Slots: {current_slot}/{player['cast']}{RESET}")
         print(f"{R}{monster_name} HP: {monster_hp}{RESET}")
         print("=" * 56)
@@ -600,7 +601,7 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward, monster_skill=None, dr
 
         print(f"{monster_name} HP: {monster_hp}")
 
-        # ── MONSTER DEATH CHECK ──────────────────────────────
+        #MONSTER DEATH CHECK 
         if monster_hp <= 0:
             print(f"\n{G}You defeated the {monster_name}!{RESET}")
             exp       += exp_reward
@@ -623,7 +624,7 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward, monster_skill=None, dr
                 print(f"HP +15 | Attack +5 | Defense +3 | Spell slots recharged!{RESET}")
             return True
 
-        # ── MONSTER TURN ─────────────────────────────────────
+        #  MONSTER TURN 
         # randint(1, 100) <= 50 means 50% chance the monster uses its skill
         if monster_skill and random.randint(1, 100) <= 50:
             monster_hp = monster_use_skill(monster_name, monster_hp, atk, monster_skill)
@@ -632,7 +633,7 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward, monster_skill=None, dr
 
         print(f"Your HP: {current_hp}")
 
-        # ── PLAYER DEATH CHECK ───────────────────────────────
+        #PLAYER DEATH CHECK
         if current_hp <= 0:
             print(f"\n{R}You died...{RESET}")
 
@@ -643,30 +644,78 @@ def fight(monster_name, hp, atk, exp_reward, gold_reward, monster_skill=None, dr
                 return False # False = player lost this fight for real
 
 
-# ── ENEMY DATA ───────────────────────────────────────────────
-# each entry is a tuple: (name, hp, atk, exp, gold, drops_list, skill_name)
+# ENEMY DATAS
+# each entry is a tuple: (name, hp, atk, exp, gold, drops_list, skill_name, monster_lore)
 # drops_list is a list of tuples: (item_name, percent_chance_to_drop)
 
-monsters_early = [ # rooms 1-20, easiest enemies
-    ("Imp",     40,  20, 10, 20, [("Apollo's Lyre +30 hp",  35)],                                    "Claw Swipe"),
-    ("Hellcat", 50,  20, 40, 25, [("Apollo's Lyre +30 hp",  30)],                                    "Claw Swipe"),
-    ("Fiend",   70,  30, 30, 35, [("Apollo's Lyre +30 hp",  25), ("Minotaur's Horns +13 atk", 15)],  "Claw Swipe")
+monsters_early = [
+    ("Imp",     40,  20, 10, 20,
+     "A mischievous demon born from stray curses and broken promises.\nIt feeds on fear and enjoys scratching heroes before fleeing into the shadows.",
+     "Claw Swipe",
+     [("Apollo's Lyre +30 hp", 35)]),
+
+    ("Hellcat", 50,  25, 40, 25,
+     "A demonic feline with burning eyes and molten claws.\nIt stalks silently through dungeon corridors, striking when prey least expects it.",
+     "Claw Swipe",
+     [("Apollo's Lyre +30 hp", 30)]),
+
+    ("Harpies",   60,  30, 30, 35,
+     "Harpies are winged spirits that punishes the guilty and leave only ruin in their wake.\nBorn from curses they serve as relentless agents of violent tribulations.",
+     "Claw Swipe",
+     [("Apollo's Lyre +30 hp", 25)]),
+
+    ("Fiend",   70,  30, 30, 35,
+     "A corrupted being forged from hatred and war.\nStronger than common demons, it delights in prolonged suffering and brutal combat.",
+     "Flare",
+     [("Apollo's Lyre +30 hp", 25), ("Minotaur's Horns +13 atk", 15)])
 ]
 
-monsters_mid = [ # rooms 21-40
-    ("Demon",     90,  35, 50, 45, [("Apollo's Lyre +30 hp",       30), ("Nemean Lion's Pelt +10 def", 20)], "Flare"),
-    ("Wraith",    110, 30, 50, 55, [("Apollo's Lyre +30 hp",       25), ("Minotaur's Horns +13 atk",  20)], "Spectral Drain"),
-    ("Hellhound", 130, 40, 55, 60, [("Nemean Lion's Pelt +10 def", 25), ("Harpe of Cronos +30 atk",   10)], "Savage Bite")
+monsters_mid = [
+    ("Demon",     90,  35, 50, 45,
+     "A true inhabitant of the abyss.\nIts body radiates heat and malice, and every step leaves scorch marks on the floor.",
+     "Flare",
+     [("Apollo's Lyre +30 hp", 30), ("Nemean Lion's Pelt +10 def", 20)]),
+
+    ("Wraith",    110, 30, 50, 55,
+     "A restless spirit bound to the dungeon by regret and vengeance.\nWeapons pass through its form unless fueled by strong will and resolve.",
+     "Spectral Drain",
+     [("Apollo's Lyre +30 hp", 25), ("Minotaur's Horns +13 atk", 20)]),
+
+    ("Hellhound", 130, 40, 55, 60,
+     "A monstrous beast born from ashes.\nIts flaming breath and relentless pursuit make escape nearly impossible.",
+     "Savage Bite",
+     [("Nemean Lion's Pelt +10 def", 25), ("Harpe of Cronos +30 atk", 10)]),
+
+    ("Empusa",    110, 40, 60, 75,
+     "A seductive servant of Hades, the Empusa lures travelers with a beautiful facade before revealing her true form.\nShe feeds on the life force of the ambitious, leaving nothing behind but cold memories and bloodstained dust in the Labyrinth's halls.",
+     "Spectral Drain",
+     [("Apollo's Lyre +30 hp", 25), ("Minotaur's Horns +13 atk", 20)])
 ]
 
-monsters_late = [ # rooms 41-60
-    ("Fallen Angel", 160, 80, 60, 80,  [("Harpe of Cronos +30 atk", 20), ("Restora +hp and +mp", 15)], "Dark Slash"),
-    ("Shadow Lord",  180, 75, 65, 90,  [("Harpe of Cronos +30 atk", 25), ("Restora +hp and +mp", 20)], "Dark Slash"),
-    ("Soul Reaper",  200, 75, 70, 100, [("Restora +hp and +mp",    25), ("Harpe of Cronos +30 atk", 20)], "Soul Rend")
+monsters_late = [
+    ("Fallen Angel", 160, 80, 67, 80,
+     "Once a divine warrior, now corrupted by pride and betrayal.\nIts radiant wings are stained black, and it fights with sorrowful fury.",
+     "Dark Slash",
+     [("Harpe of Cronos +30 atk", 20), ("Restora +hp and +mp", 15)]),
+
+    ("Shade of Zagreus",  180, 89, 75, 90,
+     "A spectral echo of a prince who once defied the underworld.\nClad in tattered robes with eyes like glowing embers, he relentlessly lashes out at any soul that dares to stand in his path.",
+     "Dark Slash",
+     [("Harpe of Cronos +30 atk", 25), ("Restora +hp and +mp", 20)]),
+
+    ("Shade of Thanatos",  200, 80, 80, 100,
+     "A silent, hooded apparition carrying a heavy scythe.\nThis shade manifests as a cold, flickering remnant of Death's own inevitability,\nharvesting the lingering regrets of those whose time in the Labyrinth has finally run out.",
+     "Soul Rend",
+     [("Restora +hp and +mp", 25), ("Harpe of Cronos +30 atk", 20)]),
+
+    ("Erinys",  250, 85, 100, 100,
+     "A winged enforcer of divine vengeance.\nThe Erinys stalks the deepest halls of the Labyrinth, drawn to the scent of unconfessed crimes,\nensuring that those who escaped justice above face it here.",
+     "Soul Rend",
+     [("Restora +hp and +mp", 25), ("Harpe of Cronos +30 atk", 20)])
 ]
 
 
-# ── MAIN GAME LOOP ───────────────────────────────────────────
+#MAIN GAME LOOP 
 # "and" means ALL three conditions must be True for the loop to keep going
 while game_running and room <= 60 and current_hp > 0:
     print(f"\n{'='*24} ROOM {room} {'='*24}")
@@ -685,6 +734,7 @@ while game_running and room <= 60 and current_hp > 0:
 
         if result == "A monster have appeared!":
             if room <= 20:
+                print("")
                 monsters = monsters_early
             elif room <= 40:
                 monsters = monsters_mid
@@ -694,7 +744,7 @@ while game_running and room <= 60 and current_hp > 0:
             enemy = random.choice(monsters) # random.choice() picks a random item from the list
             # passes the 7 elements of the tuple in the order fight() expects them
             # note: drops is index [5] and skill is index [6] in the tuple
-            fight_result = fight(enemy[0], enemy[1], enemy[2], enemy[3], enemy[4], enemy[6], enemy[5])
+            fight_result = fight(enemy[0], enemy[1], enemy[2], enemy[3], enemy[4], enemy[5], enemy[6], enemy[7])
 
             if not fight_result: # "not False" is True — so this triggers when the player lost
                 game_running = False
@@ -752,7 +802,7 @@ while game_running and room <= 60 and current_hp > 0:
 
             # HEAD 1
             print(f"\n{R}── CERBERUS: LEFT HEAD ──{RESET}")
-            head1_result = fight("Cerberus - Left Head", 200, 71, 50, 100, "Ferocious Maw")
+            head1_result = fight("Cerberus - Left Head", 300, 71, 50, 100, "A monstrous three-headed guardian born from the depths of Tartarus.\nEven severed from the whole, each head fights with savage independence.", "Ferocious Maw")
             # fight() returns True if won, False if lost
 
             if not head1_result: # player died to head 1 — stop here
@@ -761,7 +811,7 @@ while game_running and room <= 60 and current_hp > 0:
             else:
                 # HEAD 2  only runs if head 1 was beaten 
                 print(f"\n{R}── CERBERUS: RIGHT HEAD ──{RESET}")
-                head2_result = fight("Cerberus - Right Head", 200, 71, 50, 100, "Ferocious Maw")
+                head2_result = fight("Cerberus - Right Head", 200, 85, 50, 100, "The right head snarls with blind fury, snapping at anything that moves.\nIt fights harder knowing its brothers are watching.", "Ferocious Maw")
 
                 if not head2_result: # player died to head 2
                     game_running = False
@@ -769,21 +819,35 @@ while game_running and room <= 60 and current_hp > 0:
                 else:
                     # HEAD 3 the middle head, strongest, uses fire that damages based on hp so it is a threat no matter what level
                     print(f"\n{R}── CERBERUS: MIDDLE HEAD (FINAL) ──{RESET}")
-                    head3_result = fight("Cerberus - Middle Head", 300, 71, 100, 200, "Hellfire")
+                    head3_result = fight("Cerberus - Middle Head", 400, 80, 100, 200, "The dominant head, commanding the other two. Its breath carries the fire of Tartarus itself.\nThis is the last thing most souls ever see.", "Hellfire")
 
                     if not head3_result: # player died to head 3
                         game_running = False
                     else:
                         print(f"\n{G}Cerberus collapses. The path forward is open.{RESET}")
 
-        section += 1 # increments room count — happens after every venture result regardless of outcome
+    section += 1 # increments section count — happens after every venture result regardless of outcome
 
-        if section == 3:
+    if section == 3:
             room += 1
             section = 0
             print(f"You Made it to room {room}")
+            if room == 1:
+                print("=" * 55)
+                print("\nAfter meeting their end in the mortal world, " \
+                "\na powerful historical figure awakens in the Labyrinth, " \
+                "\na torturous underworld realm designed by Hades to test and confine the cursed.")
+            elif room == 21:
+                print("=" * 55)
+                print("To escape, they must fight through floors of nightmare creatures, " \
+                "\nfueled by the hope that defeating Hades will collapse the realm "
+                "\nand allow all imprisoned souls to be reincarnated.")
+            elif room == 41:
+                print("=" * 55)
+                print("As he ascends, the resistance from the monsters grows more intense, " \
+                "\nreflecting a domain that hungers to break the will of its prisoners.")
 
-        if room > 60: # final boss check — triggers when the room counter exceeds the cap
+    if room > 60: # final boss check — triggers when the room counter exceeds the cap
             print("\nYou have reached the deepest part of the labyrinth!")
             print("\nThe sovereign of this labyrinth stands before you")
             print("=" * 55)
@@ -791,23 +855,41 @@ while game_running and room <= 60 and current_hp > 0:
             print("Death is the only contract you cannot bribe your way out of.")
             print('Now, let\'s see what\'s left of you once we strip away your "hard work".')
 
-            # ── HADES PHASE 1 ─────────────────────────────────
-            boss_result = fight("Hades", 500, 100, 500, 1000, "Shadow Stab")
+            #  HADES PHASE 1 
+            boss_result = fight("Hades", 500, 100, 500, 1000, "The sovereign of the underworld, clad in obsidian armor that drinks in all light.\nHe has watched countless souls crumble before him, and he expects the same from you.", "Shadow Stab")
 
             if boss_result == True: # == True is explicit — same as "if boss_result:" but clearer for two-phase bosses
                 print("=" * 55)
                 print(f"{R}Hades gets engulfed in hellfire{RESET}")
                 print("Hades: ENOUGH!")
 
-                # ── HADES PHASE 2 ─────────────────────────────
-                Sboss_result = fight("Hades", 500, 200, 500, 1000, "Wrath of Tartarus")
+                #  HADES PHASE 2 
+                Sboss_result = fight("Hades", 800, 200, 500, 1000, "Stripped of patience, Hades sheds his regal composure entirely.\nWhat stands before you now is not a king — it is the raw, furious will of death itself.", "Wrath of Tartarus")
 
                 if Sboss_result == True:
-                    print("Hades: We will...meet again...")
                     print("=" * 55)
-                    print("The Labyrinth begins to disappear as the light engulfs")
-                    print("congratulations, You successfully escaped the Labyrinth of Hades!")
-                    game_running = False # sets flag to False so the while loop exits cleanly
+                    print("Hades' body burns in ashes as his crown is the onl thing left." \
+                    "\nonly at the very end does he realize the weight of his victory, " \
+                    "\nhe must choose between shattering the Labyrinth forever to start a new life"
+                    "\nor ascending the throne himself to prevent a total cosmic collapse.")
+                    
+                    print("   Choose Your Fate: (1)Ascend / (2)Start A New   ")
+
+                    answer = input("> ")
+                    if answer == 2:
+                        print("=" * 55)
+                        print("The Labyrinth begins to disappear as the light engulfs everything")
+                        print("congratulations, You successfully escaped the Labyrinth of Hades!")
+                        game_running = False # sets flag to False so the while loop exits cleanly
+
+                    elif answer == 1:
+                        print("=" * 55)
+                        print("The Labyrinth remains as you adore hades crown as if it was your own..." \
+                        "\nStarting today you will be the one to rule this place..." \
+                        "\nBut not for long, for hades will someday be back...")
+                        print("congratulations, You successfully conquer the Labyrinth of Hades!")
+                        game_running = False # sets flag to False so the while loop exits cleanly
+
             break # break exits the main while loop no matter what happened with Hades
 
     elif action == "2": # inventory screen
@@ -824,7 +906,9 @@ while game_running and room <= 60 and current_hp > 0:
                     equipped_tag = " [EQUIPPED]" # this string gets added to the end of the item name
                 print(f"{i}. {item}{equipped_tag}")
 
-        print("\n(E) Equip/Unequip  (U) Use consumable  (0) Back")
+        print("\n(E) Equip/Unequip  (U) Use consumable  (D) Discard" \
+        "\n"
+        "\n                                       (0) Back")
         inv_choice = input("> ")
 
         if inv_choice.lower() == "e": # .lower() so E and e both work
@@ -852,6 +936,21 @@ while game_running and room <= 60 and current_hp > 0:
                         print("That item can only be equipped, not consumed!")
                 else:
                     print("Invalid choice.")
+        
+        elif inv_choice.lower() == "d":
+            item_num = input("Choose item number to discard: ")
+            if item_num.isdigit():
+                idx = int(item_num) - 1
+        
+        # Check if the index exists in the list
+                if 0 <= idx < len(inventory):
+            # Remove the item and store its name to tell the player
+                    removed_item = inventory.pop(idx)
+                    print(f"You threw away the {removed_item}.")
+                else:
+                    print("Invalid choice.")
+            else:
+                print("Please enter a valid number.")
 
     elif action == "3":
         print("\nYou try to bail... but the labyrinth won't let you leave!")
