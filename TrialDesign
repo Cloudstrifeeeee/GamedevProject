@@ -5,7 +5,7 @@ R, G, Y, C, W = "\033[31m", "\033[32m", "\033[33m", "\033[36m", "\033[37m"
 B, RESET = "\033[1m", "\033[0m"
 
 print(f"{R}{B}╔══════════════════════════════════════════════════════╗")
-print("║                HADES' LABYRINTH                      ║")
+print("║                HADES' LABYRINTH                    ║")
 print(f"╚══════════════════════════════════════════════════════╝{RESET}")
 
 pname = input(f"{B}Enter your name HERO :{RESET} ")
@@ -129,7 +129,7 @@ def shop():
 
         # Add this into the choices - After Line 31
         #----------------------------
-        print("--------------------------")
+        print("------------------------------------------------------")
         print(f"{R}5. Sell{RESET}")
 
         print("0. Exit Shop")
