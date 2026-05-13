@@ -209,11 +209,11 @@ def venture():
     # it uses weighted chances so some events are rarer than others
 
     events = [
-        ("A monster have appeared!",       45),  # 45% — most common, keeps combat frequent
+        ("A monster have appeared!",       5),  # 45% — most common, keeps combat frequent
         ("A merchant appeared!",           20),  # 20% — shop visits, nice but not too often
         ("You found something useful!",    15),  # 15% — free loot, always appreciated
         ("You triggered a trap!",          15),  # 15% — ouch, but fair
-        ("An ominous enemy have appeared",  5),  # 5% — rare mini-boss, Cerberus encounter
+        ("An ominous enemy have appeared",  45),  # 5% — rare mini-boss, Cerberus encounter
     ]
 
     roll = random.randint(1, 100)  # picks a random number between 1 and 100 — like rolling a d100
